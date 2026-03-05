@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+// @ts-ignore
 import withPWAInit from "next-pwa";
 
 // Configure the PWA plugin itself
