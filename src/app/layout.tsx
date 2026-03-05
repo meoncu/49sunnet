@@ -23,6 +23,10 @@ export const metadata: Metadata = {
     statusBarStyle: "default",
     title: "49 Sünnet",
   },
+  icons: {
+    icon: "/icon-192x192.png",
+    apple: "/icon-192x192.png",
+  },
   formatDetection: {
     telephone: false,
   },
