@@ -1,0 +1,22 @@
+{
+  "name": "49 Sünnet Uygulaması",
+  "short_name": "49 Sünnet",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f4f5fb",
+  "theme_color": "#4f46e5",
+  "description": "Peygamber Efendimizin sünnetlerini gruplar ve maddeler halinde kaydetmek ve okumak için modern PWA.",
+  "icons": [
+    {
+      "src": "/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
+

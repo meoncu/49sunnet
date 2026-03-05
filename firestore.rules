@@ -1,0 +1,44 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // meoncu@gmail.com'a tam yetki
+    function isMeoncu() {
+      return request.auth != null && request.auth.token.email == "meoncu@gmail.com";
+    }
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && 
+        (request.auth.token.admin == true || 
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin');
+    }
+
+    // Groups collection
+    match /groups/{groupId} {
+      allow read: if true;
+      allow write: if isMeoncu() || isAdmin();
+    }
+
+    // Sunnahs collection
+    match /sunnahs/{sunnahId} {
+      allow read: if true;
+      allow write: if isMeoncu() || isAdmin();
+    }
+
+    // Users collection
+    match /users/{userId} {
+      allow read: if isAuthenticated() && (isOwner(userId) || isMeoncu() || isAdmin());
+      allow create: if isAuthenticated() && isOwner(userId);
+      allow update: if isAuthenticated() && (isOwner(userId) || isMeoncu() || isAdmin());
+      allow delete: if isMeoncu() || isAdmin();
+    }
+  }
+}
