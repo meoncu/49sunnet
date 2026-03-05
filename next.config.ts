@@ -9,7 +9,9 @@ const withPWA = withPWAInit({
 
 // Base Next.js config
 const nextConfig: NextConfig = {
-  reactCompiler: true,
+  // reactCompiler: true,
+  // @ts-ignore
+  turbopack: {},
 };
 
 // Export wrapped config
