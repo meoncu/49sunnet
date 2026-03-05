@@ -15,8 +15,25 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "49 Sünnet Uygulaması",
-  description:
-    "Peygamber Efendimizin sünnetlerini grup ve maddeler halinde kaydetmek ve okumak için web uygulaması.",
+  description: "Peygamber Efendimizin sünnetlerini grup ve maddeler halinde kaydetmek ve okumak için web uygulaması.",
+  manifest: "/manifest.json",
+  themeColor: "#0D7377",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "49 Sünnet",
+  },
+  formatDetection: {
+    telephone: false,
+  },
+};
+
+export const viewport = {
+  themeColor: "#0D7377",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
 };
 
 export default function RootLayout({

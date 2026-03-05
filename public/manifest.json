@@ -3,8 +3,8 @@
   "short_name": "49 Sünnet",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#f4f5fb",
-  "theme_color": "#4f46e5",
+  "background_color": "#FAF7F0",
+  "theme_color": "#0D7377",
   "description": "Peygamber Efendimizin sünnetlerini gruplar ve maddeler halinde kaydetmek ve okumak için modern PWA.",
   "icons": [
     {
@@ -19,4 +19,3 @@
     }
   ]
 }
-
