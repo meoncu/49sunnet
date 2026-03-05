@@ -22,16 +22,27 @@ const firebaseConfig = {
   measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
 
-let app: FirebaseApp;
+let app: FirebaseApp | undefined;
+let auth: Auth | any;
+let db: Firestore | any;
 
-if (!getApps().length) {
-  app = initializeApp(firebaseConfig);
-} else {
-  app = getApps()[0]!;
+try {
+  if (firebaseConfig.apiKey) {
+    if (!getApps().length) {
+      app = initializeApp(firebaseConfig);
+    } else {
+      app = getApps()[0]!;
+    }
+    auth = getAuth(app);
+    db = getFirestore(app);
+  } else {
+    console.warn("Firebase API key missing. Firebase might be disabled during build.");
+  }
+} catch (error) {
+  console.error("Firebase initialization error:", error);
 }
 
-export const auth: Auth = getAuth(app);
-export const db: Firestore = getFirestore(app);
+export { auth, db, app };
 export const googleProvider = new GoogleAuthProvider();
 
 export { serverTimestamp, type Timestamp, type User };
