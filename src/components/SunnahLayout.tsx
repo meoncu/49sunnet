@@ -103,9 +103,9 @@ export function SunnahLayout({ initialParentGroupId = null }: SunnahLayoutProps)
   }
 
   return (
-    <div className="relative flex min-h-screen w-full flex-col bg-[#FAF7F0] font-sans md:mx-auto md:max-w-lg shadow-2xl overflow-hidden">
-      {/* Header */}
-      <header className="bg-white px-5 py-6 border-b border-[#E8E0D0] sticky top-0 z-20">
+    <div className="relative flex h-screen w-full flex-col bg-[#FAF7F0] font-sans md:mx-auto md:max-w-lg shadow-2xl overflow-hidden shadow-[#2C3E50]/20">
+      {/* Header - Fixed at top */}
+      <header className="flex-shrink-0 bg-white px-5 py-6 border-b border-[#E8E0D0] z-20">
         <div className="flex justify-between items-center mb-5">
           <div className="flex items-center gap-2">
             <div className="w-2 h-8 bg-[#0D7377] rounded-full"></div>
@@ -120,7 +120,7 @@ export function SunnahLayout({ initialParentGroupId = null }: SunnahLayoutProps)
               <span className="absolute top-2 right-2 w-1.5 h-1.5 bg-[#C9A227] rounded-full border border-white"></span>
             </button>
             <div className="h-9 w-9 overflow-hidden rounded-lg border border-[#E8E0D0] bg-[#F3F4F6] flex items-center justify-center text-sm font-bold text-[#6B7280]">
-              {(user.displayName ?? "U").charAt(0).toUpperCase()}
+              {(user?.displayName ?? "U").charAt(0).toUpperCase()}
             </div>
           </div>
         </div>
@@ -139,8 +139,9 @@ export function SunnahLayout({ initialParentGroupId = null }: SunnahLayoutProps)
         </div>
       </header>
 
+      {/* Main Content Area - Scrollable */}
       <div className="flex flex-1 overflow-hidden relative">
-        <div className="flex-1 overflow-y-auto no-scrollbar pb-24">
+        <div className="flex-1 overflow-y-auto no-scrollbar scroll-smooth">
           {/* Featured Card */}
           {!searchQuery && (
             <div className="px-5 pt-6 pb-2">
@@ -170,7 +171,7 @@ export function SunnahLayout({ initialParentGroupId = null }: SunnahLayoutProps)
           )}
 
           {/* Categories */}
-          <nav className="px-5 py-4 overflow-x-auto no-scrollbar flex gap-3">
+          <nav className="px-5 py-4 overflow-x-auto no-scrollbar flex gap-3 sticky top-0 bg-[#FAF7F0] z-10 border-b border-[#E8E0D0]/30">
             <button
               className={cn(
                 "shrink-0 px-4 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wider transition-all border",
@@ -195,8 +196,8 @@ export function SunnahLayout({ initialParentGroupId = null }: SunnahLayoutProps)
           </nav>
 
           {/* Archive List */}
-          <section className="bg-white min-h-screen">
-            <div className="px-5 py-3 border-b border-[#F3F4F6] flex justify-between items-center bg-[#FAF7F0]/50 sticky top-0 z-10 backdrop-blur-sm">
+          <section className="bg-white min-h-full">
+            <div className="px-5 py-3 border-b border-[#F3F4F6] flex justify-between items-center bg-[#FAF7F0]/80 sticky top-[53px] z-10 backdrop-blur-md">
               <h3 className="text-[11px] font-bold text-[#2C3E50] uppercase tracking-widest">Repository Index</h3>
               <div className="flex gap-4">
                 <span className="text-[10px] font-bold text-[#0D7377]">ID Order</span>
@@ -227,11 +228,12 @@ export function SunnahLayout({ initialParentGroupId = null }: SunnahLayoutProps)
                 )}
               </tbody>
             </table>
+            <div className="h-10"></div> {/* Bottom spacing for accessibility */}
           </section>
         </div>
 
         {/* A-Z Scroller Scroller */}
-        <div className="w-6 border-l border-[#E8E0D0] bg-[#FAF7F0]/30 hidden md:flex flex-col items-center justify-center gap-1 py-4">
+        <div className="w-6 border-l border-[#E8E0D0] bg-[#FAF7F0]/30 hidden md:flex flex-col items-center justify-center gap-1 py-4 flex-shrink-0">
           {"ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").map(letter => (
             <span key={letter} className="text-[8px] font-bold text-[#9CA3AF] cursor-default hover:text-[#0D7377]">
               {letter}
@@ -240,8 +242,8 @@ export function SunnahLayout({ initialParentGroupId = null }: SunnahLayoutProps)
         </div>
       </div>
 
-      {/* Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 md:relative bg-white border-t border-[#E8E0D0] px-4 py-3 z-30 shadow-[0_-8px_15px_-3px_rgba(0,0,0,0.03)]">
+      {/* Bottom Navigation - Fixed at bottom of flow */}
+      <nav className="flex-shrink-0 bg-white border-t border-[#E8E0D0] px-4 py-3 z-30 shadow-[0_-8px_20px_-3px_rgba(0,0,0,0.05)]">
         <div className="flex justify-around items-center">
           <NavItem icon={Library} label="Archive" active />
           <NavItem icon={Compass} label="Discover" />

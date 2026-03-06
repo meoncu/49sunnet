@@ -113,24 +113,23 @@ export function useAdminSunnahs() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Bir grup için sonraki sıra numarasını bul
-  const getNextSequence = useCallback(async (groupId: string) => {
+  // Tüm kayıtlar için sonraki sıra numarasını bul (Global Sequence)
+  const getNextSequence = useCallback(async () => {
     const sunnahsRef = collection(db, "sunnahs");
-    const q = query(sunnahsRef, where("groupId", "==", groupId));
-    const snapshot = await getDocs(q);
-    
+    const snapshot = await getDocs(sunnahsRef);
+
     if (snapshot.empty) {
       return 1; // İlk kayıt
     }
-    
+
     const sequences = snapshot.docs.map(doc => doc.data().sequence as number);
     const maxSequence = Math.max(...sequences, 0);
-    
+
     // Silinen sıra numaralarını bul
-    const allNumbers = Array.from({length: maxSequence}, (_, i) => i + 1);
+    const allNumbers = Array.from({ length: maxSequence }, (_, i) => i + 1);
     const usedNumbers = new Set(sequences);
     const availableNumbers = allNumbers.filter(n => !usedNumbers.has(n));
-    
+
     // Boş sıra varsa onu kullan, yoksa sonraki numarayı ver
     return availableNumbers.length > 0 ? availableNumbers[0] : maxSequence + 1;
   }, []);
@@ -142,12 +141,12 @@ export function useAdminSunnahs() {
       setError(null);
       try {
         let sequence = data.sequence;
-        
-        // Otomatik sıra isteniyorsa hesapla
+
+        // Otomatik sıra isteniyorsa hesapla (Global)
         if (autoSequence) {
-          sequence = await getNextSequence(data.groupId);
+          sequence = await getNextSequence();
         }
-        
+
         const sunnahsRef = collection(db, "sunnahs");
         const docRef = await addDoc(sunnahsRef, {
           ...data,
@@ -185,35 +184,33 @@ export function useAdminSunnahs() {
     []
   );
 
-  // Sünnet sil ve istenirse boşluğu doldur (kaydır)
+  // Sünnet sil ve istenirse boşluğu doldur (kaydır) - Global
   const deleteSunnah = useCallback(async (id: string, fillGap = false) => {
     setLoading(true);
     setError(null);
     try {
-      // Silinecek dokümanı bul (groupId ve sequence için)
       const sunnahRef = doc(db, "sunnahs", id);
       const sunnahDoc = await getDoc(sunnahRef);
-      
+
       if (!sunnahDoc.exists()) {
         throw new Error("Sünnet bulunamadı");
       }
-      
-      const { groupId, sequence: deletedSequence } = sunnahDoc.data();
-      
+
+      const { sequence: deletedSequence } = sunnahDoc.data();
+
       // Sil
       await deleteDoc(sunnahRef);
-      
-      // Boşluğu doldurma isteniyorsa
+
+      // Boşluğu doldurma isteniyorsa (Global)
       if (fillGap) {
         const sunnahsRef = collection(db, "sunnahs");
         const q = query(
-          sunnahsRef, 
-          where("groupId", "==", groupId),
+          sunnahsRef,
           where("sequence", ">", deletedSequence),
           orderBy("sequence", "asc")
         );
         const snapshot = await getDocs(q);
-        
+
         // Sırayı birer azalt
         const batch = writeBatch(db);
         snapshot.docs.forEach((doc) => {
@@ -237,15 +234,15 @@ export function useAdminSunnahs() {
     setError(null);
     try {
       const batch = writeBatch(db);
-      
+
       updates.forEach(({ id, sequence }) => {
         const sunnahRef = doc(db, "sunnahs", id);
-        batch.update(sunnahRef, { 
+        batch.update(sunnahRef, {
           sequence,
           updatedAt: serverTimestamp(),
         });
       });
-      
+
       await batch.commit();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Bir hata oluştu");

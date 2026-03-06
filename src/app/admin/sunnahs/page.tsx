@@ -17,6 +17,7 @@ import {
   GripVertical,
   Save,
   Search,
+  Activity,
 } from "lucide-react";
 
 export default function SunnahsAdmin() {
@@ -74,16 +75,45 @@ export default function SunnahsAdmin() {
   };
 
   // Sıralama modunu başlat
-  const startReorderMode = (groupId: string) => {
-    setSelectedGroupForReorder(groupId);
-    const groupSunnahs = sunnahs
-      .filter((s) => s.groupId === groupId)
-      .sort((a, b) => a.sequence - b.sequence);
-    setReorderingSunnahs(groupSunnahs);
+  const startReorderMode = (groupId?: string) => {
+    let listToReorder = [...sunnahs];
+    if (groupId && groupId !== "all") {
+      setSelectedGroupForReorder(groupId);
+      listToReorder = listToReorder.filter((s) => s.groupId === groupId);
+    } else {
+      setSelectedGroupForReorder("all");
+    }
+
+    setReorderingSunnahs(listToReorder.sort((a, b) => a.sequence - b.sequence));
     setIsReorderMode(true);
   };
 
-  // Yukarı taşı
+  // Tüm listeyi 1'den başlayarak yeniden numaralandır
+  const reIndexAll = async () => {
+    if (!confirm("Tüm sünnet numaraları 1'den başlayarak yeniden düzenlenecektir. Onaylıyor musunuz?")) return;
+
+    try {
+      const updates = sunnahs
+        .sort((a, b) => {
+          // Önce grup sırasına, sonra kendi sırasına göre diz
+          const groupA = groups.find(g => g.id === a.groupId)?.order || 0;
+          const groupB = groups.find(g => g.id === b.groupId)?.order || 0;
+          if (groupA !== groupB) return groupA - groupB;
+          return a.sequence - b.sequence;
+        })
+        .map((sunnah, index) => ({
+          id: sunnah.id,
+          sequence: index + 1,
+        }));
+
+      await reorderSunnahs(updates);
+      loadData();
+      alert("Tüm kayıtlar başarıyla yeniden numaralandırıldı.");
+    } catch (err) {
+      console.error("Yeniden indeksleme hatası:", err);
+    }
+  };
+
   const moveUp = (index: number) => {
     if (index === 0) return;
     const newSunnahs = [...reorderingSunnahs];
@@ -94,7 +124,6 @@ export default function SunnahsAdmin() {
     setReorderingSunnahs(newSunnahs);
   };
 
-  // Aşağı taşı
   const moveDown = (index: number) => {
     if (index === reorderingSunnahs.length - 1) return;
     const newSunnahs = [...reorderingSunnahs];
@@ -105,7 +134,6 @@ export default function SunnahsAdmin() {
     setReorderingSunnahs(newSunnahs);
   };
 
-  // Sıralamayı kaydet
   const saveReorder = async () => {
     try {
       const updates = reorderingSunnahs.map((sunnah, index) => ({
@@ -123,8 +151,12 @@ export default function SunnahsAdmin() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      const formattedShortText = formData.shortText.trim();
+      const capitalizedShortText = formattedShortText.charAt(0).toUpperCase() + formattedShortText.slice(1);
+
       const data = {
         ...formData,
+        shortText: capitalizedShortText,
         detailText: formData.detailText || null,
         hadithArabic: formData.hadithArabic || null,
         hadithTranslation: formData.hadithTranslation || null,
@@ -160,7 +192,7 @@ export default function SunnahsAdmin() {
 
   const handleDelete = async (id: string) => {
     try {
-      await deleteSunnah(id);
+      await deleteSunnah(id, true);
       setDeleteConfirm(null);
       loadData();
     } catch (err) {
@@ -232,14 +264,31 @@ export default function SunnahsAdmin() {
           <h2 className="text-2xl font-bold text-[#2C3E50] tracking-tight">Sünnet Kayıtları</h2>
           <p className="text-[10px] font-bold text-[#9CA3AF] uppercase tracking-widest">Repository Management</p>
         </div>
-        {!isFormOpen && (
-          <button
-            onClick={() => setIsFormOpen(true)}
-            className="inline-flex items-center gap-2 rounded-lg bg-[#0D7377] px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-[#0D7377]/20 transition-all hover:bg-[#095754]"
-          >
-            <Plus className="h-4 w-4" />
-            Yeni Sünnet
-          </button>
+        {!isFormOpen && !isReorderMode && (
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => reIndexAll()}
+              className="inline-flex items-center gap-2 rounded-lg border border-[#E8E0D0] bg-white px-4 py-2.5 text-xs font-bold text-[#2C3E50] transition-all hover:bg-[#FAF7F0] active:scale-95"
+              title="Tüm numaraları 1'den başlayarak yeniden düzenler"
+            >
+              <Activity className="h-3.5 w-3.5 text-[#C9A227]" />
+              NUMARALARI DÜZELT
+            </button>
+            <button
+              onClick={() => startReorderMode("all")}
+              className="inline-flex items-center gap-2 rounded-lg border border-[#E8E0D0] bg-white px-4 py-2.5 text-xs font-bold text-[#2C3E50] transition-all hover:bg-[#FAF7F0] active:scale-95"
+            >
+              <GripVertical className="h-4 w-4 text-[#0D7377]" />
+              GENEL SIRALAMA
+            </button>
+            <button
+              onClick={() => setIsFormOpen(true)}
+              className="inline-flex items-center gap-2 rounded-lg bg-[#0D7377] px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-[#0D7377]/20 transition-all hover:bg-[#095754] active:scale-95"
+            >
+              <Plus className="h-4 w-4" />
+              YENİ SÜNNET
+            </button>
+          </div>
         )}
       </div>
 
@@ -359,8 +408,87 @@ export default function SunnahsAdmin() {
         </div>
       )}
 
+      {/* Reorder Mode Section */}
+      {isReorderMode && (
+        <div className="space-y-6">
+          <div className="bg-white border-2 border-[#0D7377] rounded-xl p-6 shadow-xl relative overflow-hidden">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h3 className="text-xl font-bold text-[#2C3E50]">Sıralama Düzenleniyor</h3>
+                <p className="text-[10px] font-bold text-[#0D7377] uppercase tracking-widest">
+                  {selectedGroupForReorder === "all" ? "Tüm Repository" : `${getGroupName(selectedGroupForReorder)} Kategorisi`}
+                </p>
+              </div>
+              <div className="flex gap-3">
+                <button
+                  onClick={saveReorder}
+                  className="bg-[#0D7377] text-white px-6 py-2 rounded-lg font-bold text-sm hover:bg-[#095754] transition-all flex items-center gap-2"
+                >
+                  <Check className="h-4 w-4" />
+                  SIRALAMAYI KAYDET
+                </button>
+                <button
+                  onClick={() => setIsReorderMode(false)}
+                  className="border border-[#E8E0D0] text-[#2C3E50] px-6 py-2 rounded-lg font-bold text-sm hover:bg-[#FAF7F0] transition-all"
+                >
+                  İPTAL
+                </button>
+              </div>
+            </div>
+
+            <div className="bg-[#FAF7F0] rounded-lg border border-[#E8E0D0] overflow-hidden">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="bg-[#E8E0D0]/30">
+                    <th className="px-6 py-4 text-left font-bold text-[#9CA3AF] text-[10px] uppercase w-16">Sıra</th>
+                    <th className="px-6 py-4 text-left font-bold text-[#9CA3AF] text-[10px] uppercase">Sünnet</th>
+                    <th className="px-6 py-4 text-left font-bold text-[#9CA3AF] text-[10px] uppercase">Kategori</th>
+                    <th className="px-6 py-4 text-right font-bold text-[#9CA3AF] text-[10px] uppercase">Kontrol</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#E8E0D0]/50">
+                  {reorderingSunnahs.map((sunnah, index) => (
+                    <tr key={sunnah.id} className="bg-white hover:bg-[#FAF7F0] transition-colors">
+                      <td className="px-6 py-4 font-mono font-bold text-[#0D7377]">
+                        {(index + 1).toString().padStart(3, "0")}
+                      </td>
+                      <td className="px-6 py-4 font-bold text-[#2C3E50]">
+                        {sunnah.shortText}
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="text-[10px] font-bold text-[#9CA3AF] uppercase bg-[#FAF7F0] px-2 py-1 rounded">
+                          {getGroupName(sunnah.groupId)}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <div className="flex justify-end gap-1">
+                          <button
+                            onClick={() => moveUp(index)}
+                            disabled={index === 0}
+                            className="p-2 text-[#9CA3AF] hover:text-[#0D7377] disabled:opacity-20 transition-all border border-transparent hover:border-[#E8E0D0] rounded"
+                          >
+                            <ArrowUp className="h-4 w-4" />
+                          </button>
+                          <button
+                            onClick={() => moveDown(index)}
+                            disabled={index === reorderingSunnahs.length - 1}
+                            className="p-2 text-[#9CA3AF] hover:text-[#0D7377] disabled:opacity-20 transition-all border border-transparent hover:border-[#E8E0D0] rounded"
+                          >
+                            <ArrowDown className="h-4 w-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* List Section */}
-      {!isFormOpen && (
+      {!isFormOpen && !isReorderMode && (
         <div className="space-y-6">
           {/* Controls */}
           <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
@@ -368,23 +496,32 @@ export default function SunnahsAdmin() {
               <Search className="absolute left-3 top-2.5 h-4 w-4 text-[#9CA3AF]" />
               <input
                 type="text"
-                placeholder="Search repository..."
+                placeholder="Repository içinde ara..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full bg-white border border-[#E8E0D0] pl-10 pr-4 py-2.5 rounded-lg text-sm focus:ring-1 focus:ring-[#0D7377] focus:outline-none"
               />
             </div>
-            <div className="flex gap-2 w-full md:w-auto overflow-x-auto no-scrollbar pb-1">
+            <div className="flex gap-2 w-full md:w-auto items-center">
               <select
                 value={filterGroupId}
                 onChange={(e) => setFilterGroupId(e.target.value)}
-                className="bg-white border border-[#E8E0D0] px-4 py-2.5 rounded-lg text-sm focus:outline-none"
+                className="bg-white border border-[#E8E0D0] px-4 py-2.5 rounded-lg text-sm focus:outline-none min-w-[200px]"
               >
                 <option value="all">Tüm Kategoriler</option>
                 {groups.map((group) => (
                   <option key={group.id} value={group.id}>{group.name}</option>
                 ))}
               </select>
+              {filterGroupId !== "all" && (
+                <button
+                  onClick={() => startReorderMode(filterGroupId)}
+                  className="p-2.5 text-[#0D7377] border border-[#E8E0D0] bg-white rounded-lg hover:bg-[#FAF7F0] transition-colors"
+                  title="Bu kategoriyi sırala"
+                >
+                  <GripVertical className="h-4 w-4" />
+                </button>
+              )}
             </div>
           </div>
 
@@ -417,7 +554,14 @@ export default function SunnahsAdmin() {
                     <td className="px-6 py-4 text-right">
                       <div className="flex justify-end gap-2">
                         <button onClick={() => handleEdit(sunnah)} className="p-2 text-[#9CA3AF] hover:text-[#0D7377] transition-all"><Pencil className="h-4 w-4" /></button>
-                        <button onClick={() => setDeleteConfirm(sunnah.id)} className="p-2 text-[#9CA3AF] hover:text-red-500 transition-all"><Trash2 className="h-4 w-4" /></button>
+                        {deleteConfirm === sunnah.id ? (
+                          <div className="flex items-center gap-1">
+                            <button onClick={() => handleDelete(sunnah.id)} className="bg-red-500 text-white p-2 rounded-lg hover:bg-red-600"><Check className="h-4 w-4" /></button>
+                            <button onClick={() => setDeleteConfirm(null)} className="bg-slate-200 text-slate-700 p-2 rounded-lg hover:bg-slate-300"><X className="h-4 w-4" /></button>
+                          </div>
+                        ) : (
+                          <button onClick={() => setDeleteConfirm(sunnah.id)} className="p-2 text-[#9CA3AF] hover:text-red-500 transition-all"><Trash2 className="h-4 w-4" /></button>
+                        )}
                       </div>
                     </td>
                   </tr>
