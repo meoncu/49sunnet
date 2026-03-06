@@ -66,7 +66,7 @@ async function ensureUserDocument(user: User): Promise<Role> {
     const data = snapshot.data() as { role?: Role };
     // Token'dan admin claim'i varsa, Firestore'u da güncelle
     if (isAdminFromToken && data.role !== "admin") {
-      await updateDoc(userRef, {role: "admin"});
+      await updateDoc(userRef, { role: "admin" });
       return "admin";
     }
     return data.role ?? "user";
@@ -91,6 +91,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!auth) {
+      console.warn("Auth instance is not available. Check Firebase configuration.");
+      setLoading(false);
+      return;
+    }
+
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (!firebaseUser) {
         setUser(null);
@@ -98,9 +104,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      const role = await ensureUserDocument(firebaseUser);
-      setUser(mapUserWithRole(firebaseUser, role));
-      setLoading(false);
+      try {
+        const role = await ensureUserDocument(firebaseUser);
+        setUser(mapUserWithRole(firebaseUser, role));
+      } catch (error) {
+        console.error("Error setting user role:", error);
+        setUser(mapUserWithRole(firebaseUser, "user"));
+      } finally {
+        setLoading(false);
+      }
     });
 
     return () => unsubscribe();
@@ -114,9 +126,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await signOut(auth);
   }, []);
 
-    // Admin kontrolü: Firestore role veya email fallback
+  // Admin kontrolü: Firestore role veya email fallback
   const ADMIN_EMAIL = "meoncu@gmail.com";
-  const isAdminUser = user?.role === "admin" || user?.email === ADMIN_EMAIL;
+  const isAdminUser = user?.role === "admin" ||
+    user?.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase();
 
   const value: AuthContextValue = {
     user,

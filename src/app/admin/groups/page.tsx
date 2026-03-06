@@ -136,9 +136,12 @@ export default function GroupsAdmin() {
               </label>
               <input
                 type="number"
-                value={formData.order}
+                value={Number.isNaN(formData.order) ? "" : formData.order}
                 onChange={(e) =>
-                  setFormData({ ...formData, order: parseInt(e.target.value) })
+                  setFormData({
+                    ...formData,
+                    order: e.target.value === "" ? 0 : parseInt(e.target.value) || 0
+                  })
                 }
                 className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                 required
