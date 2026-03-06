@@ -84,166 +84,131 @@ export default function GroupsAdmin() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-8 bg-[#FDFBF4] min-h-screen p-4 md:p-8">
+      <div className="flex items-center justify-between pb-6 border-b border-[#E8E0D0]">
         <div>
-          <h2 className="text-2xl font-bold text-slate-900">Kategoriler</h2>
-          <p className="text-sm text-slate-600">
-            Sünnet kategorilerini yönetin
-          </p>
+          <h2 className="text-2xl font-bold text-[#2C3E50] tracking-tight">Kategori Yönetimi</h2>
+          <p className="text-[10px] font-bold text-[#9CA3AF] uppercase tracking-widest">Classification Engine</p>
         </div>
-        <button
-          onClick={() => setIsFormOpen(true)}
-          className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary/90"
-        >
-          <Plus className="h-4 w-4" />
-          Yeni Kategori
-        </button>
+        {!isFormOpen && (
+          <button
+            onClick={() => setIsFormOpen(true)}
+            className="inline-flex items-center gap-2 rounded-lg bg-[#0D7377] px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-[#0D7377]/20 transition-all hover:bg-[#095754]"
+          >
+            <Plus className="h-4 w-4" />
+            Yeni Kategori
+          </button>
+        )}
       </div>
 
       {error && (
-        <div className="flex items-center gap-2 rounded-lg bg-red-50 p-4 text-sm text-red-600">
+        <div className="flex items-center gap-2 rounded-lg bg-red-50 p-4 text-sm text-red-600 border border-red-100">
           <AlertCircle className="h-4 w-4" />
           {error}
         </div>
       )}
 
-      {/* Form */}
+      {/* Form Section */}
       {isFormOpen && (
-        <div className="rounded-xl border border-slate-200 bg-white p-6">
-          <h3 className="mb-4 text-lg font-semibold text-slate-900">
-            {editingGroup ? "Kategori Düzenle" : "Yeni Kategori"}
-          </h3>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">
-                Kategori Adı
-              </label>
-              <input
-                type="text"
-                value={formData.name}
-                onChange={(e) =>
-                  setFormData({ ...formData, name: e.target.value })
-                }
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-                placeholder="örn: Sabah Sünnetleri"
-                required
-              />
+        <div className="rounded-xl border border-[#E8E0D0] bg-white p-8 relative overflow-hidden shadow-sm">
+          <div className="absolute top-0 left-0 w-1 h-full bg-[#0D7377]"></div>
+          <div className="flex justify-between items-center mb-8">
+            <h3 className="text-xl font-bold text-[#2C3E50]">
+              {editingGroup ? "Kategori Düzenle" : "Kategori Kayıt"}
+            </h3>
+            <button onClick={handleCancel} className="text-[#9CA3AF] hover:text-[#2C3E50]">
+              <X className="h-6 w-6" />
+            </button>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold text-[#9CA3AF] uppercase tracking-widest">Kategori Adı *</label>
+                <input
+                  type="text"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  className="w-full bg-[#FAF7F0] border border-[#E8E0D0] rounded-lg px-4 py-3 text-sm focus:border-[#0D7377] focus:outline-none transition-all"
+                  placeholder="örn: Sabah Sünnetleri"
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold text-[#9CA3AF] uppercase tracking-widest">Sıra Numarası</label>
+                <input
+                  type="number"
+                  value={Number.isNaN(formData.order) ? "" : formData.order}
+                  onChange={(e) => setFormData({ ...formData, order: e.target.value === "" ? 0 : parseInt(e.target.value) || 0 })}
+                  className="w-full bg-[#FAF7F0] border border-[#E8E0D0] rounded-lg px-4 py-3 text-sm focus:border-[#0D7377] focus:outline-none transition-all"
+                  required
+                />
+              </div>
             </div>
-            <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">
-                Sıra Numarası
-              </label>
-              <input
-                type="number"
-                value={Number.isNaN(formData.order) ? "" : formData.order}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    order: e.target.value === "" ? 0 : parseInt(e.target.value) || 0
-                  })
-                }
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-                required
-              />
-            </div>
-            <div className="flex gap-2">
+
+            <div className="pt-4 flex gap-3">
               <button
                 type="submit"
                 disabled={loading}
-                className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary/90 disabled:opacity-50"
+                className="flex-1 bg-[#0D7377] text-white py-4 rounded-xl font-bold transition-all hover:bg-[#095754] disabled:opacity-50 shadow-lg shadow-[#0D7377]/20 flex items-center justify-center gap-2"
               >
-                <Check className="h-4 w-4" />
-                {loading ? "Kaydediliyor..." : "Kaydet"}
+                <Check className="h-5 w-5" />
+                {loading ? "KAYDEDİLİYOR..." : "KAYDET"}
               </button>
               <button
                 type="button"
                 onClick={handleCancel}
-                className="inline-flex items-center gap-2 rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                className="px-8 border border-[#E8E0D0] text-[#2C3E50] font-bold rounded-xl hover:bg-[#FAF7F0] transition-all"
               >
-                <X className="h-4 w-4" />
-                İptal
+                İPTAL
               </button>
             </div>
           </form>
         </div>
       )}
 
-      {/* Liste */}
-      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
-        <table className="w-full text-sm">
-          <thead className="bg-slate-50">
-            <tr>
-              <th className="px-4 py-3 text-left font-medium text-slate-700">
-                Sıra
-              </th>
-              <th className="px-4 py-3 text-left font-medium text-slate-700">
-                Kategori Adı
-              </th>
-              <th className="px-4 py-3 text-right font-medium text-slate-700">
-                İşlemler
-              </th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-200">
-            {groups.map((group) => (
-              <tr key={group.id} className="hover:bg-slate-50">
-                <td className="px-4 py-3 text-slate-600">{group.order}</td>
-                <td className="px-4 py-3 font-medium text-slate-900">
-                  {group.name}
-                </td>
-                <td className="px-4 py-3 text-right">
-                  <div className="flex justify-end gap-2">
-                    <button
-                      onClick={() => handleEdit(group)}
-                      className="rounded-lg p-2 text-slate-600 hover:bg-slate-100 hover:text-primary"
-                      title="Düzenle"
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </button>
-                    {deleteConfirm === group.id ? (
-                      <div className="flex items-center gap-1">
-                        <button
-                          onClick={() => handleDelete(group.id)}
-                          className="rounded-lg bg-red-100 p-2 text-red-600 hover:bg-red-200"
-                          title="Onayla"
-                        >
-                          <Check className="h-4 w-4" />
-                        </button>
-                        <button
-                          onClick={() => setDeleteConfirm(null)}
-                          className="rounded-lg p-2 text-slate-600 hover:bg-slate-100"
-                          title="İptal"
-                        >
-                          <X className="h-4 w-4" />
-                        </button>
-                      </div>
-                    ) : (
-                      <button
-                        onClick={() => setDeleteConfirm(group.id)}
-                        className="rounded-lg p-2 text-slate-600 hover:bg-red-50 hover:text-red-600"
-                        title="Sil"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    )}
-                  </div>
-                </td>
+      {/* List Section */}
+      {!isFormOpen && (
+        <div className="bg-white border border-[#E8E0D0] rounded-xl overflow-hidden shadow-sm">
+          <table className="w-full text-sm academic-table">
+            <thead>
+              <tr className="bg-[#FAF7F0]">
+                <th className="px-6 py-4 text-left font-bold text-[#9CA3AF] uppercase text-[10px] tracking-widest w-24">SIRA</th>
+                <th className="px-6 py-4 text-left font-bold text-[#9CA3AF] uppercase text-[10px] tracking-widest">KATEGORİ TANIMI</th>
+                <th className="px-6 py-4 text-right font-bold text-[#9CA3AF] uppercase text-[10px] tracking-widest w-32">İŞLEMLER</th>
               </tr>
-            ))}
-            {groups.length === 0 && (
-              <tr>
-                <td
-                  colSpan={3}
-                  className="px-4 py-8 text-center text-slate-500"
-                >
-                  Henüz kategori eklenmemiş.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody className="divide-y divide-[#F3F4F6]">
+              {groups.map((group) => (
+                <tr key={group.id} className="hover:bg-[#FAF7F0]/50 transition-colors group">
+                  <td className="px-6 py-4 font-mono font-bold text-[#0D7377]">
+                    {group.order.toString().padStart(2, "0")}
+                  </td>
+                  <td className="px-6 py-4 font-bold text-[#2C3E50]">
+                    {group.name}
+                  </td>
+                  <td className="px-6 py-4 text-right">
+                    <div className="flex justify-end gap-2">
+                      <button onClick={() => handleEdit(group)} className="p-2 text-[#9CA3AF] hover:text-[#0D7377] transition-all"><Pencil className="h-4 w-4" /></button>
+                      <button onClick={() => setDeleteConfirm(group.id)} className="p-2 text-[#9CA3AF] hover:text-red-500 transition-all"><Trash2 className="h-4 w-4" /></button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+              {groups.length === 0 && (
+                <tr>
+                  <td colSpan={3} className="px-6 py-12 text-center text-[#9CA3AF]">
+                    <div className="flex flex-col items-center gap-2">
+                      <AlertCircle className="h-8 w-8 opacity-20" />
+                      <p className="font-medium">Henüz kategori eklenmemiş.</p>
+                    </div>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }

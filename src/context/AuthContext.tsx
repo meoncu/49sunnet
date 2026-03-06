@@ -31,6 +31,7 @@ type AppUser = {
   uid: string;
   displayName: string | null;
   email: string | null;
+  photoURL: string | null;
   role: Role;
 };
 
@@ -49,6 +50,7 @@ function mapUserWithRole(user: User, role: Role): AppUser {
     uid: user.uid,
     displayName: user.displayName,
     email: user.email,
+    photoURL: user.photoURL,
     role,
   };
 }
@@ -79,6 +81,7 @@ async function ensureUserDocument(user: User): Promise<Role> {
     uid: user.uid,
     displayName: user.displayName,
     email: user.email,
+    photoURL: user.photoURL,
     role,
     createdAt: serverTimestamp(),
   });

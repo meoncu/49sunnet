@@ -16,6 +16,10 @@ import {
   ChevronRight,
   ExternalLink,
   Sparkles,
+  Bell,
+  Compass,
+  User as UserIcon,
+  Share2,
 } from "lucide-react";
 
 type SunnahLayoutProps = {
@@ -32,6 +36,8 @@ export function SunnahLayout({ initialParentGroupId = null }: SunnahLayoutProps)
 
   const { groups: parentGroups } = useGroups(null);
   const { sunnahs, loading: sunnahsLoading } = useSunnahs(selectedGroupId);
+
+  const featuredSunnah = sunnahs.find(s => s.sequence === 1) || sunnahs[0];
 
   const filteredSunnahs = sunnahs.filter((s) => {
     if (!searchQuery.trim()) return true;
@@ -69,12 +75,12 @@ export function SunnahLayout({ initialParentGroupId = null }: SunnahLayoutProps)
         <div className="w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl border-t-4 border-[#0D7377]">
           <div className="p-8">
             <div className="mb-6">
-              <h1 className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#6B7280] mb-1">Corpus Sunnah v1.0</h1>
-              <h2 className="text-3xl font-bold tracking-tighter text-[#2C3E50] leading-none">Akademik Referans Kitaplığı</h2>
+              <h1 className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#6B7280] mb-1">49SÜNNET ACADEMIC</h1>
+              <h2 className="text-3xl font-bold tracking-tighter text-[#2C3E50] leading-none">Scholarly Research Library</h2>
             </div>
 
             <p className="mb-8 text-sm leading-relaxed text-[#6B7280]">
-              Peygamber Efendimizin (s.a.v) sahih rivayetlerini akademik bir bakış açısıyla inceleyin ve kaydedin.
+              Peygamber Efendimizin (s.a.v) sahih rivayetlerini akademik bir bakış açısıyla inceleyin, kaydedin ve hayatınıza geçirin.
             </p>
 
             <button
@@ -97,22 +103,29 @@ export function SunnahLayout({ initialParentGroupId = null }: SunnahLayoutProps)
   }
 
   return (
-    <div className="relative flex min-h-screen w-full flex-col bg-[#FAF7F0] font-sans md:mx-auto md:max-w-lg shadow-2xl">
+    <div className="relative flex min-h-screen w-full flex-col bg-[#FAF7F0] font-sans md:mx-auto md:max-w-lg shadow-2xl overflow-hidden">
       {/* Header */}
-      <header className="bg-white px-4 py-6 border-b-2 border-[#0D7377]/30 sticky top-0 z-20">
-        <div className="flex justify-between items-start mb-4">
-          <div>
-            <h1 className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#9CA3AF] mb-1">Corpus Sunnah v1.0</h1>
-            <h2 className="text-2xl font-bold tracking-tighter text-[#2C3E50] leading-none">Akademik Referans Kitaplığı</h2>
+      <header className="bg-white px-5 py-6 border-b border-[#E8E0D0] sticky top-0 z-20">
+        <div className="flex justify-between items-center mb-5">
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-8 bg-[#0D7377] rounded-full"></div>
+            <div>
+              <h2 className="text-xl font-bold tracking-tight text-[#2C3E50] leading-none">49Sünnet</h2>
+              <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-[#9CA3AF]">Academic Archive</p>
+            </div>
           </div>
-          <div className="flex h-10 w-10 shrink-0 items-center overflow-hidden rounded-md border border-[#E8E0D0] grayscale">
-            <div className="flex h-full w-full items-center justify-center bg-[#F3F4F6] text-xs font-bold text-[#6B7280]">
+          <div className="flex items-center gap-3">
+            <button className="p-2 text-[#2C3E50] hover:bg-[#F3F4F6] rounded-full transition-colors relative">
+              <Bell className="h-5 w-5" />
+              <span className="absolute top-2 right-2 w-1.5 h-1.5 bg-[#C9A227] rounded-full border border-white"></span>
+            </button>
+            <div className="h-9 w-9 overflow-hidden rounded-lg border border-[#E8E0D0] bg-[#F3F4F6] flex items-center justify-center text-sm font-bold text-[#6B7280]">
               {(user.displayName ?? "U").charAt(0).toUpperCase()}
             </div>
           </div>
         </div>
 
-        <div className="relative">
+        <div className="relative mb-2">
           <span className="absolute inset-y-0 left-3 flex items-center text-[#9CA3AF]">
             <Search className="h-4 w-4" />
           </span>
@@ -120,93 +133,125 @@ export function SunnahLayout({ initialParentGroupId = null }: SunnahLayoutProps)
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Hadis, Ravi veya Konu Ara..."
-            className="w-full pl-9 pr-4 py-2 bg-[#F3F4F6] border-none rounded-md text-sm focus:ring-1 focus:ring-[#0D7377] placeholder:text-[#9CA3AF] transition-all"
+            placeholder="Search Hadith, Category, or Source..."
+            className="w-full pl-10 pr-4 py-2 bg-[#F3F4F6] border-none rounded-lg text-sm focus:ring-1 focus:ring-[#0D7377] placeholder:text-[#9CA3AF] transition-all"
           />
         </div>
       </header>
 
-      {/* Categories */}
-      <nav className="px-4 py-3 bg-[#FAF7F0] border-b border-[#E8E0D0]">
-        <div className="no-scrollbar flex gap-2 overflow-x-auto">
-          <button
-            className={cn(
-              "shrink-0 px-3 py-1 rounded text-[11px] font-bold uppercase transition-all",
-              !selectedGroupId ? "bg-[#0D7377] text-white" : "border border-[#D1D5DB] text-[#6B7280]"
-            )}
-            onClick={() => {
-              setSelectedGroupId(null);
-              setExpandedSunnahId(null);
-            }}
-          >
-            Tümü
-          </button>
-          {parentGroups.map((g) => (
+      <div className="flex flex-1 overflow-hidden relative">
+        <div className="flex-1 overflow-y-auto no-scrollbar pb-24">
+          {/* Featured Card */}
+          {!searchQuery && (
+            <div className="px-5 pt-6 pb-2">
+              <h3 className="text-[11px] font-bold text-[#9CA3AF] uppercase tracking-widest mb-3">Featured Daily Sunnah</h3>
+              <div className="bg-white rounded-2xl border border-[#E8E0D0] p-6 relative overflow-hidden group transition-all hover:border-[#0D7377]/50">
+                <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                  <Sparkles className="h-12 w-12 text-[#0D7377]" />
+                </div>
+                {featuredSunnah && (
+                  <>
+                    <p className="font-arabic text-2xl text-right text-[#2C3E50] leading-relaxed mb-4" dir="rtl">
+                      {featuredSunnah.hadithArabic}
+                    </p>
+                    <h4 className="text-lg font-bold text-[#2C3E50] leading-tight mb-2">
+                      {featuredSunnah.shortText}
+                    </h4>
+                    <button
+                      onClick={() => setExpandedSunnahId(featuredSunnah.id)}
+                      className="text-[11px] font-bold text-[#0D7377] uppercase tracking-wider flex items-center gap-1 hover:underline"
+                    >
+                      Devamını Gör <ChevronRight className="h-3 w-3" />
+                    </button>
+                  </>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Categories */}
+          <nav className="px-5 py-4 overflow-x-auto no-scrollbar flex gap-3">
             <button
-              key={g.id}
               className={cn(
-                "shrink-0 px-3 py-1 rounded text-[11px] font-bold uppercase transition-all",
-                selectedGroupId === g.id ? "bg-[#0D7377] text-white" : "border border-[#D1D5DB] text-[#6B7280]"
+                "shrink-0 px-4 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wider transition-all border",
+                !selectedGroupId ? "bg-[#0D7377] border-[#0D7377] text-white" : "bg-white border-[#E8E0D0] text-[#9CA3AF]"
               )}
-              onClick={() => {
-                setSelectedGroupId(g.id);
-                setExpandedSunnahId(null);
-              }}
+              onClick={() => setSelectedGroupId(null)}
             >
-              {g.name}
+              Archive
             </button>
+            {parentGroups.map((g) => (
+              <button
+                key={g.id}
+                className={cn(
+                  "shrink-0 px-4 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wider transition-all border",
+                  selectedGroupId === g.id ? "bg-[#0D7377] border-[#0D7377] text-white" : "bg-white border-[#E8E0D0] text-[#9CA3AF]"
+                )}
+                onClick={() => setSelectedGroupId(g.id)}
+              >
+                {g.name}
+              </button>
+            ))}
+          </nav>
+
+          {/* Archive List */}
+          <section className="bg-white min-h-screen">
+            <div className="px-5 py-3 border-b border-[#F3F4F6] flex justify-between items-center bg-[#FAF7F0]/50 sticky top-0 z-10 backdrop-blur-sm">
+              <h3 className="text-[11px] font-bold text-[#2C3E50] uppercase tracking-widest">Repository Index</h3>
+              <div className="flex gap-4">
+                <span className="text-[10px] font-bold text-[#0D7377]">ID Order</span>
+                <span className="text-[10px] font-bold text-[#9CA3AF]">A-Z</span>
+              </div>
+            </div>
+
+            <table className="w-full text-[13px] academic-table border-t border-[#E8E0D0]">
+              <tbody className="divide-y divide-[#F3F4F6]">
+                {filteredSunnahs.map((s) => (
+                  <SunnahRow
+                    key={s.id}
+                    sunnah={s}
+                    isExpanded={expandedSunnahId === s.id}
+                    onToggle={() => setExpandedSunnahId(expandedSunnahId === s.id ? null : s.id)}
+                  />
+                ))}
+
+                {filteredSunnahs.length === 0 && !sunnahsLoading && (
+                  <tr>
+                    <td colSpan={3} className="px-4 py-20 text-center">
+                      <div className="flex flex-col items-center justify-center text-[#9CA3AF]">
+                        <Search className="h-8 w-8 mb-2 opacity-20" />
+                        <p className="text-sm font-medium">No results found</p>
+                      </div>
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </section>
+        </div>
+
+        {/* A-Z Scroller Scroller */}
+        <div className="w-6 border-l border-[#E8E0D0] bg-[#FAF7F0]/30 hidden md:flex flex-col items-center justify-center gap-1 py-4">
+          {"ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").map(letter => (
+            <span key={letter} className="text-[8px] font-bold text-[#9CA3AF] cursor-default hover:text-[#0D7377]">
+              {letter}
+            </span>
           ))}
         </div>
-      </nav>
-
-      {/* Main Content */}
-      <main className="flex-1 bg-white pb-20">
-        <table className="w-full text-[13px] academic-table">
-          <thead className="bg-[#FAF7F0] border-b border-[#E8E0D0]">
-            <tr>
-              <th className="w-14 px-4 py-3 text-left font-bold text-[#6B7280] uppercase text-[10px] tracking-wider">ID</th>
-              <th className="px-4 py-3 text-left font-bold text-[#6B7280] uppercase text-[10px] tracking-wider">Hadis/Sünnet Metni</th>
-              <th className="w-10 px-4 py-3"></th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-[#F3F4F6]">
-            {filteredSunnahs.map((s) => (
-              <SunnahRow
-                key={s.id}
-                sunnah={s}
-                isExpanded={expandedSunnahId === s.id}
-                onToggle={() => setExpandedSunnahId(expandedSunnahId === s.id ? null : s.id)}
-              />
-            ))}
-
-            {filteredSunnahs.length === 0 && !sunnahsLoading && (
-              <tr>
-                <td colSpan={3} className="px-4 py-20 text-center">
-                  <div className="flex flex-col items-center justify-center text-[#9CA3AF]">
-                    <Search className="h-8 w-8 mb-2 opacity-20" />
-                    <p className="text-sm font-medium">Sonuç bulunamadı</p>
-                    <p className="text-xs">Farklı bir arama yapmayı deneyin.</p>
-                  </div>
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </main>
+      </div>
 
       {/* Bottom Navigation */}
-      <nav className="sticky bottom-0 left-0 right-0 bg-white border-t border-[#E8E0D0] px-4 py-3 z-30 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+      <nav className="fixed bottom-0 left-0 right-0 md:relative bg-white border-t border-[#E8E0D0] px-4 py-3 z-30 shadow-[0_-8px_15px_-3px_rgba(0,0,0,0.03)]">
         <div className="flex justify-around items-center">
-          <NavItem icon={Library} label="Arşiv" active />
-          <NavItem icon={BarChart3} label="İstatistik" />
-          <NavItem icon={History} label="Notlar" />
-          {isAdmin ? (
-            <Link href="/admin" className="flex flex-col items-center gap-0.5 text-[#9CA3AF]">
+          <NavItem icon={Library} label="Archive" active />
+          <NavItem icon={Compass} label="Discover" />
+          <NavItem icon={BarChart3} label="Insights" />
+          <NavItem icon={UserIcon} label="Profile" />
+          {isAdmin && (
+            <Link href="/admin" className="flex flex-col items-center gap-0.5 text-[#9CA3AF] hover:text-[#0D7377] transition-colors">
               <Settings className="h-5 w-5" />
               <p className="text-[9px] font-bold uppercase tracking-tighter">Panel</p>
             </Link>
-          ) : (
-            <NavItem icon={Settings} label="Ayarlar" />
           )}
         </div>
       </nav>
@@ -219,76 +264,89 @@ function SunnahRow({ sunnah, isExpanded, onToggle }: { sunnah: Sunnah, isExpande
     <>
       <tr
         className={cn(
-          "transition-colors cursor-pointer",
+          "transition-colors cursor-pointer group",
           isExpanded ? "bg-[#0D7377]/5" : "hover:bg-[#F9FAFB]"
         )}
         onClick={onToggle}
       >
         <td className={cn(
-          "px-4 py-4 font-mono font-bold transition-colors",
-          isExpanded ? "text-[#0D7377]" : "text-[#9CA3AF]"
+          "px-5 py-5 font-mono font-bold transition-colors w-16",
+          isExpanded ? "text-[#0D7377]" : "text-[#9CA3AF] group-hover:text-[#0D7377]"
         )}>
           {sunnah.sequence.toString().padStart(3, "0")}
         </td>
-        <td className={cn(
-          "px-4 py-4 font-medium transition-colors",
-          isExpanded ? "text-[#2C3E50]" : "text-[#4B5563]"
-        )}>
-          {sunnah.shortText}
+        <td className="px-2 py-5">
+          <div className="flex flex-col gap-1">
+            <span className={cn(
+              "font-medium transition-colors text-[14px] leading-tight",
+              isExpanded ? "text-[#2C3E50]" : "text-[#4B5563] group-hover:text-[#2C3E50]"
+            )}>
+              {sunnah.shortText}
+            </span>
+            {!isExpanded && (
+              <span className="text-[9px] font-bold text-[#10B981] uppercase tracking-tighter flex items-center gap-1">
+                <div className="w-1 h-1 rounded-full bg-[#10B981]"></div> Sahih
+              </span>
+            )}
+          </div>
         </td>
-        <td className="px-4 py-4 text-right">
-          {isExpanded ? (
-            <ChevronDown className="h-4 w-4 text-[#0D7377]" />
-          ) : (
-            <ChevronRight className="h-4 w-4 text-[#D1D5DB]" />
-          )}
+        <td className="px-5 py-5 text-right w-10">
+          <div className={cn(
+            "w-6 h-6 rounded-full flex items-center justify-center transition-all",
+            isExpanded ? "bg-[#0D7377] text-white rotate-180" : "bg-[#F3F4F6] text-[#9CA3AF] group-hover:bg-[#E8E0D0]"
+          )}>
+            <ChevronDown className="h-3.5 w-3.5" />
+          </div>
         </td>
       </tr>
 
       {isExpanded && (
         <tr>
-          <td colSpan={3} className="bg-[#FAF7F0] p-0 border-b border-[#0D7377]/20">
-            <div className="p-6 space-y-6 animate-in slide-in-from-top-2 duration-300">
-              <div className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <span className="text-[10px] bg-[#0D7377]/20 text-[#0D7377] px-2 py-0.5 rounded font-bold uppercase">Metin & Rivayet</span>
-                  <span className="text-[10px] text-[#9CA3AF] font-mono tracking-widest uppercase">REF: S-{sunnah.sequence + 1000}</span>
+          <td colSpan={3} className="bg-[#FDFBF4] p-0 border-b border-[#0D7377]/20">
+            <div className="p-7 space-y-7 animate-in slide-in-from-top-2 duration-300">
+              <div className="space-y-5">
+                <div className="flex justify-between items-center pb-2 border-b border-[#E8E0D0]">
+                  <h3 className="text-xs font-bold text-[#2C3E50] uppercase tracking-widest">
+                    Sunnah ID: S-{sunnah.sequence?.toString().padStart(3, "0") || "000"}
+                  </h3>
+                  <span className="text-[10px] bg-[#0D7377] text-white px-2 py-0.5 rounded-sm font-bold uppercase tracking-tighter">SAHİH</span>
                 </div>
 
                 {sunnah.hadithArabic && (
-                  <p
-                    className="text-right font-arabic text-3xl leading-relaxed text-[#2C3E50] py-4"
-                    dir="rtl"
-                  >
-                    {sunnah.hadithArabic}
-                  </p>
+                  <div className="py-4">
+                    <p
+                      className="text-right font-arabic text-3xl leading-[1.8] text-[#2C3E50]"
+                      dir="rtl"
+                    >
+                      {sunnah.hadithArabic}
+                    </p>
+                  </div>
                 )}
 
-                <p className="text-sm italic text-[#4B5563] border-l-2 border-[#0D7377]/30 pl-3 leading-relaxed">
-                  "{sunnah.hadithTranslation || sunnah.detailText}"
-                </p>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <h4 className="text-[10px] font-bold text-[#9CA3AF] uppercase mb-1.5 antialiased">Kaynaklar</h4>
-                  <p className="text-[11px] text-[#4B5563] leading-relaxed">
-                    • {sunnah.hadithSource || "Hadis kaynakları araştırılıyor."}
+                <div className="space-y-3">
+                  <h4 className="text-[10px] font-bold text-[#9CA3AF] uppercase tracking-widest">Metin & Tercüme</h4>
+                  <p className="text-sm text-[#4B5563] leading-relaxed font-sans">
+                    {sunnah.hadithTranslation || sunnah.detailText}
                   </p>
                 </div>
-                <div>
-                  <h4 className="text-[10px] font-bold text-[#9CA3AF] uppercase mb-1.5 antialiased">Sıhhat Derecesi</h4>
-                  <div className="flex items-center gap-1.5">
-                    <span className="h-2 w-2 rounded-full bg-emerald-500 shadow-sm shadow-emerald-200"></span>
-                    <span className="text-[11px] font-bold text-emerald-600">Sahih (Mütevatir)</span>
-                  </div>
+              </div>
+
+              <div className="grid grid-cols-1 gap-6 pt-2">
+                <div className="p-4 bg-white rounded-lg border border-[#E8E0D0] space-y-2">
+                  <h4 className="text-[9px] font-bold text-[#9CA3AF] uppercase tracking-widest">Hadis Kaynağı</h4>
+                  <p className="text-[12px] text-[#2C3E50] font-medium leading-relaxed italic">
+                    {sunnah.hadithSource || "Kaynak bilgisi akademik arşivde araştırılmaktadır."}
+                  </p>
                 </div>
               </div>
 
-              <div className="pt-4 border-t border-[#E8E0D0]">
-                <button className="w-full py-2.5 bg-[#0D7377] text-white text-[11px] font-bold rounded flex items-center justify-center gap-2 transition-all hover:bg-[#095754] active:scale-[0.98]">
-                  AKADEMİK ANALİZİ GÖRÜNTÜLE
+              <div className="pt-2 flex gap-3">
+                <button className="flex-1 py-3 bg-[#0D7377] text-white text-[11px] font-bold rounded-lg flex items-center justify-center gap-2 transition-all hover:bg-[#095754] active:scale-[0.98] shadow-sm">
+                  DETAYLI ANALİZ
                   <ExternalLink className="h-3.5 w-3.5" />
+                </button>
+                <button className="px-4 py-3 bg-white border border-[#E8E0D0] text-[#2C3E50] rounded-lg transition-all hover:bg-[#F3F4F6]">
+                  <Share2 className="h-4 w-4" />
                 </button>
               </div>
             </div>
